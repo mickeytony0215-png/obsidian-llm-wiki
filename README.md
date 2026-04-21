@@ -1,18 +1,55 @@
 # obsidian-llm-wiki
 
-An Obsidian + Claude Code workflow for reading academic papers and building a personal research wiki. This repo ships **only the workflow** — the slash commands, the schema, the Obsidian config — without the author's personal research notes. Clone it, drop in your own PDFs, and you get a reproducible pipeline.
+**Turn a growing pile of academic papers into a self-maintaining, citable research wiki — with [Claude Code](https://claude.com/claude-code) and [Obsidian](https://obsidian.md).**
 
-The pipeline follows Andrej Karpathy's [LLM wiki pattern](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f) (three-layer architecture: raw / wiki / schema; three operations: ingest / query / lint), with two extensions: a **review-gatekeeping layer** that prevents unreviewed notes from polluting the wiki, and a **paper-to-presentation pipeline** that turns reviewed notes into seminar drafts and slide material.
+Twelve slash commands wire a three-layer architecture (raw sources → reviewed notes → compiled wiki) under one rule: **no auto-generated claim enters the wiki until a human verifies it against the original PDF.** No cloud service beyond Claude. Your papers, notes, and knowledge graph all live on your disk.
+
+This repo ships **only the workflow** — the slash commands, the schema, the Obsidian config. It does not ship the author's personal research notes, PDFs, or filled-in profile. Clone it, drop in your own PDFs, edit `SKILL.md` once, and you have a reproducible paper-to-wiki pipeline. The design follows Andrej Karpathy's [LLM wiki pattern](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f) (three-layer architecture: raw / wiki / schema; three operations: ingest / query / lint), extended with a **review-gatekeeping layer** that prevents unreviewed notes from polluting the wiki, a **paper-to-presentation pipeline** that turns reviewed notes into seminar drafts and slide material, and a **read-only query layer** (`/search-vault`) with structured filters, backlink / orphan graphs, and optional semantic search.
+
+## Is this for you?
+
+**Pick this up if you…**
+
+- Read two or more academic papers a week and want them to compound into something you can query, not just a file cabinet.
+- Already use, or are willing to adopt, Claude Code and Obsidian.
+- Have been burned by LLMs confidently "summarising" a paper with details they invented, and want tooling that catches that before it spreads through your notes.
+- Prefer a local-first setup you can edit and fork over a hosted SaaS.
+
+**Skip this if you…**
+
+- Want a plug-and-play note-taking app. This is an opinionated workflow; expect to edit a SKILL file and a few templates.
+- Want an LLM to auto-summarise hundreds of PDFs without a human review step. The review gate is mandatory by design.
+- Are primarily looking for a citation / reference manager. Zotero and friends remain better at that; this repo complements them rather than replacing them.
+
+## A 30-second tour
+
+A typical paper flowing through the pipeline:
+
+```
+> /read-paper paper.pdf        # reads the PDF, produces a structured note marked `unreviewed`
+> /review-note paper           # claim-by-claim audit against the PDF; sets `reviewed` / `reviewed_with_notes` / `disputed`
+> /lint-related-work paper     # (optional) Related Work framing fairness check
+> /ingest-to-wiki paper        # hard-refuses if still unreviewed; builds the wiki source + concept pages
+> /paper-report paper          # (optional) seminar-report draft
+> /paper-ppt    paper          # (optional) bilingual slide material (slides in English, speaker notes in your language)
+> /lint-wiki                   # every 5–10 papers: orphan pages, broken links, cascade-caveat audit
+> /search-vault <mode>         # read-only queries: structured / content / orphan / inbound / stats / semantic
+```
+
+What you get after a handful of papers: a `wiki/` folder with source pages per paper, concept pages with cross-paper comparisons, a synthesis layer for literature reviews, and a Dataview-powered index that keeps itself up to date. Every citation carries a cascade caveat reflecting its paper's review status — a `disputed` paper cannot quietly be cited as fact three pages deep.
 
 ## Contents
 
-1. [The three layers](#the-three-layers)
-2. [The ten slash commands](#the-ten-slash-commands)
-3. [Typical workflow](#typical-workflow)
-4. [The review gate](#the-review-gate)
-5. [Setup](#setup)
-6. [What is and isn't in this repo](#what-is-and-isnt-in-this-repo)
-7. [Credit and license](#credit-and-license)
+1. [Is this for you?](#is-this-for-you)
+2. [A 30-second tour](#a-30-second-tour)
+3. [The three layers](#the-three-layers)
+4. [The twelve slash commands](#the-twelve-slash-commands)
+5. [Typical workflow](#typical-workflow)
+6. [The review gate](#the-review-gate)
+7. [Setup](#setup)
+8. [What is and isn't in this repo](#what-is-and-isnt-in-this-repo)
+9. [Non-goals](#non-goals)
+10. [Credit and license](#credit-and-license)
 
 ## The three layers
 
@@ -27,12 +64,12 @@ wiki/                     # LLM-compiled knowledge base
   └── synthesis/          # Cross-source comparative analyses
 .claude/
   ├── skills/SKILL.md     # Shared context: user background, writing rules, schema
-  └── commands/           # The ten slash commands documented below
+  └── commands/           # The twelve slash commands documented below
 note/Templates/           # Obsidian note templates for new papers
 .obsidian/                # Vault config (Dataview, Claudian, BRAT)
 ```
 
-## The ten slash commands
+## The twelve slash commands
 
 Each command is defined as a markdown file in `.claude/commands/`. They're grouped by role in the pipeline.
 
@@ -49,6 +86,13 @@ Each command is defined as a markdown file in `.claude/commands/`. They're group
 | Command | Purpose | Trigger | Output |
 |---|---|---|---|
 | **`/review-note`** | The most important command. Full audit of a note against the PDF: claim-by-claim comparison, logical consistency (motivation → method → results → conclusion), and data-credibility red flags (arithmetic-progression tables, "every metric wins" patterns, in-text/table contradictions). Updates `review_status` and appends to `wiki/review-history.md`. | After `/read-paper`, or anytime a note is suspected | Updated frontmatter (`reviewed` / `reviewed_with_notes` / `disputed`), a `## Review log` section in the note, and an audit entry in `wiki/review-history.md` |
+| **`/lint-related-work`** | Fairness audit of a paper's Related Work framing. Phase 1 (mechanical): grep for absolutist wording (`completely overlooked`, `entirely fails`, …), extract the baseline list, flag scope mismatches (an authentication paper citing a task-scheduling paper as a baseline, etc.). Phase 2 (optional, needs the baseline PDF in `raw/papers/`): cross-validate each criticised baseline against its own Abstract / Contributions to catch self-contradictory criticisms. Suggests but does not auto-apply `review_status` downgrades. | After `/read-paper`, before `/ingest-to-wiki`, or when preparing a seminar talk on a focal paper | Structured markdown lint report; when issues are found, an entry is appended to `wiki/log.md` |
+
+### Query and discovery
+
+| Command | Purpose | Trigger | Output |
+|---|---|---|---|
+| **`/search-vault`** | Read-only structured and semantic search over the vault, backed by `.claude/scripts/search_vault.py`. Six modes: `structured` (frontmatter filters — status / tag / year / type), `content` (ripgrep full-text), `orphan` (pages with zero inbound `[[wikilinks]]`, complements `/lint-wiki`), `inbound` (backlinks of a given target, supports `[[alias]]` / `[[#section]]` / `[[path/to/target]]`), `stats` (review-status / year / top-tag distributions), and `semantic` (BM25 + vector + LLM-rerank via [qmd](https://github.com/tobi/qmd), with `query` / `vsearch` / `search` sub-modes for hybrid, pure-vector, or pure-keyword). Never modifies files. | Finding related papers by tag / year / status, checking backlinks before touching a page, auditing orphans, or looking up concepts by meaning rather than exact string | Markdown report with `[[wikilink]]` results — drop-in for notes |
 
 ### Note-to-wiki
 
@@ -94,6 +138,8 @@ The commands chain together. A typical paper-to-wiki cycle:
    every 5–10 papers: /lint-wiki  ← structural + cascade-caveat audit
 ```
 
+`/search-vault` sits outside this pipeline — it's a read-only inspection tool usable at any step (find related papers before writing, check backlinks before renaming, audit orphans alongside `/lint-wiki`, or reach for semantic search when you don't remember the exact string).
+
 Three points to internalize:
 
 - **`/ingest-to-wiki` hard-refuses `unreviewed` notes.** This is the core quality gate — see below.
@@ -128,7 +174,7 @@ Red flags the reviewer actively hunts for (each has burned a real paper):
 1. **Clone this repo.**
 2. **Open the folder as an Obsidian vault.** Obsidian will prompt to install the community plugins listed in `.obsidian/community-plugins.json`: `dataview` (required — `wiki/index.md` queries rely on it), `obsidian42-brat` (for installing Claudian), `claudian` (optional, Claude-in-Obsidian plugin).
 3. **Install Claude Code** and place your PDFs under `raw/papers/` (gitignored).
-4. **The ten slash commands are already wired up** — just type `/read-paper` inside Claude Code while the vault is the working directory. `SKILL.md` is loaded as shared context automatically.
+4. **The twelve slash commands are already wired up** — just type `/read-paper` inside Claude Code while the vault is the working directory. `SKILL.md` is loaded as shared context automatically.
 5. **Edit `SKILL.md`** at `.claude/skills/SKILL.md`. The top section ("Researcher profile") has placeholders for your role, research domain, output language, and common obligations — fill them in so Claude tailors analysis and output accordingly. Everything below the horizontal rule is the universal workflow spec and should not need editing.
 
 ### Recommended customization points
@@ -140,7 +186,12 @@ Red flags the reviewer actively hunts for (each has burned a real paper):
 
 ## What is and isn't in this repo
 
-**Included**: all ten slash commands, `SKILL.md`, the wiki schema (`index.md`, `dashboard.md`), Obsidian config (app settings, plugin list, graph settings), Obsidian note templates, and this README.
+**Included**: all twelve slash commands (the two newest — `/search-vault` and `/lint-related-work` — are shipped as spec-only markdown; their Python implementations are intentionally not bundled, see below), `SKILL.md`, the wiki schema (`index.md`, `dashboard.md`), Obsidian config (app settings, plugin list, graph settings), Obsidian note templates, and this README.
+
+Note on the spec-only commands:
+
+- `/search-vault` describes a six-mode Python script at `.claude/scripts/search_vault.py` (not shipped). Fork users reimplement it from the spec, or replace it with Dataview queries and shell snippets. Its semantic mode depends on [qmd](https://github.com/tobi/qmd), which is also not bundled; the other five modes (structured / content / orphan / inbound / stats) are pure Python with no external dependencies.
+- `/lint-related-work` describes a two-phase fairness check (mechanical red flags + optional baseline cross-validation). Fork users implement the grep-and-compare logic; the dictionary of absolutist wording provided in the spec is a starter set to curate for each domain and language.
 
 **Not included** (intentionally):
 
@@ -149,6 +200,13 @@ Red flags the reviewer actively hunts for (each has burned a real paper):
 - The author's research notes, wiki sources, concept pages, synthesis pages, seminar reports, and PPT drafts — those live locally and are gitignored
 - Personal Claude Code session history (`.claude/sessions/`) and permission-allowlist (`.claude/settings.json` — full of personal file paths)
 - Obsidian workspace state and third-party plugin binaries (reinstalled from `community-plugins.json` on first launch)
+
+## Non-goals
+
+- **Zero-config paper summaries.** If you want to drop PDFs into a hopper and get auto-summaries, this is not it. The review gate exists because quality matters more than throughput for research work; expect to spend 10–30 minutes per paper on `/review-note`.
+- **A better Zotero.** No literature discovery, no citation export, no library sync. Pair with Zotero: Zotero for finding and filing papers, this repo for reading them deeply and synthesising across them.
+- **A generic Obsidian starter.** The schema is tuned to academic papers (source / concept / entity / synthesis pages, `review_status` frontmatter, cascade-caveat citations). Adapt it for non-paper knowledge if you want, but expect to rewrite several commands.
+- **Cloud backup or collaboration.** Everything is local files plus Claude Code. No hosted index, no user accounts, no multi-user sync. Pair with your own backup tool (OneDrive, Dropbox, git, etc.) — note that OneDrive and `.git/` do not play well together, so git separately from your vault sync path.
 
 ## Credit and license
 
