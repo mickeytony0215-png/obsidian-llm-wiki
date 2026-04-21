@@ -1,0 +1,61 @@
+# ─── Copyrighted paper content ───────────────────────────────────────
+*.pdf
+*_text.txt
+hake_reread.txt
+
+# ─── Images (paper screenshots / pasted images) ──────────────────────
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.webp
+*.bmp
+
+# ─── Personal research notes at repo root ────────────────────────────
+# Exclude all top-level .md except README
+/*.md
+!/README.md
+
+# Research outputs produced by the skills (keep locally, don't share)
+/seminar-report-*.md
+/slide-draft-*.md
+*.base
+/wikilink.md
+
+# ─── Research content under note/ (keep only Templates) ──────────────
+/note/*
+!/note/Templates/
+/note/.obsidian/
+
+# ─── Raw paper sources ───────────────────────────────────────────────
+/raw/*
+!/raw/README.md
+
+# ─── Wiki research content (keep only schema templates) ──────────────
+/wiki/concepts/
+/wiki/entities/
+/wiki/sources/
+/wiki/synthesis/
+/wiki/log.md
+/wiki/review-history.md
+/wiki/pending-review.md
+/wiki/integration-progress.md
+/wiki/wiki/
+
+# ─── Personal Claude Code / Claudian state (any depth) ───────────────
+**/.claude/sessions/
+**/.claude/settings.json
+**/.claudian/
+
+# ─── Obsidian personal state and plugin binaries (any depth) ─────────
+**/.obsidian/workspace.json
+**/.obsidian/workspace-mobile.json
+**/.obsidian/workspace.json.bak
+**/.obsidian/plugins/
+
+# ─── OS / OneDrive artifacts ─────────────────────────────────────────
+Thumbs.db
+desktop.ini
+~$*
+*.tmp
+.DS_Store
