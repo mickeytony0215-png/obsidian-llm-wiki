@@ -1,6 +1,6 @@
 # Shared Context (SKILL.md)
 
-This file is auto-loaded by Claude Code when this vault is the working directory. It defines the LLM side of the workflow and the wiki schema that `/ingest-to-wiki` and `/lint-wiki` rely on.
+This file is auto-loaded by Claudian (the Obsidian plugin) and by Claude Code (the CLI) whenever this vault is the working directory. It defines the LLM side of the workflow and the wiki schema that `/ingest-to-wiki` and `/lint-wiki` rely on.
 
 The **Researcher profile** section at the top is meant to be edited by each user. Everything under the horizontal rule is the universal workflow spec; only edit it if you intentionally change the wiki structure.
 

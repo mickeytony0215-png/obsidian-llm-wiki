@@ -1,6 +1,6 @@
 # obsidian-llm-wiki
 
-**Turn a growing pile of academic papers into a self-maintaining, citable research wiki — with [Claude Code](https://claude.com/claude-code) and [Obsidian](https://obsidian.md).**
+**Turn a growing pile of academic papers into a self-maintaining, citable research wiki — inside [Obsidian](https://obsidian.md), powered by [Claudian](https://obsidian.md/plugins?id=claudian) (Claude right in your editor).**
 
 Twelve slash commands wire a three-layer architecture (raw sources → reviewed notes → compiled wiki) under one rule: **no auto-generated claim enters the wiki until a human verifies it against the original PDF.** No cloud service beyond Claude. Your papers, notes, and knowledge graph all live on your disk.
 
@@ -11,7 +11,7 @@ This repo ships **only the workflow** — the slash commands, the schema, the Ob
 **Pick this up if you…**
 
 - Read two or more academic papers a week and want them to compound into something you can query, not just a file cabinet.
-- Already use, or are willing to adopt, Claude Code and Obsidian.
+- Already use, or are willing to adopt, Obsidian with the Claudian plugin (the [Claude Code](https://claude.com/claude-code) CLI is a compatible alternative — the twelve commands follow Claude Code's `.claude/commands/` format and work in either).
 - Have been burned by LLMs confidently "summarising" a paper with details they invented, and want tooling that catches that before it spreads through your notes.
 - Prefer a local-first setup you can edit and fork over a hosted SaaS.
 
@@ -172,9 +172,12 @@ Red flags the reviewer actively hunts for (each has burned a real paper):
 ## Setup
 
 1. **Clone this repo.**
-2. **Open the folder as an Obsidian vault.** Obsidian will prompt to install the community plugins listed in `.obsidian/community-plugins.json`: `dataview` (required — `wiki/index.md` queries rely on it), `obsidian42-brat` (for installing Claudian), `claudian` (optional, Claude-in-Obsidian plugin).
-3. **Install Claude Code** and place your PDFs under `raw/papers/` (gitignored).
-4. **The twelve slash commands are already wired up** — just type `/read-paper` inside Claude Code while the vault is the working directory. `SKILL.md` is loaded as shared context automatically.
+2. **Open the folder as an Obsidian vault.** Obsidian will prompt to install the three community plugins listed in `.obsidian/community-plugins.json`:
+   - `dataview` — **required**. `wiki/index.md` and `wiki/dashboard.md` rely on it; without it, the knowledge-base index and health dashboard are empty.
+   - `obsidian42-brat` — **required if you want Claudian**. BRAT is the beta-release channel through which Claudian is installed and updated.
+   - `claudian` — **the primary interface for this workflow**. It brings Claude into Obsidian and loads slash commands from `.claude/commands/`, so `/read-paper`, `/review-note`, etc. just work from the Obsidian chat pane.
+3. **Drop your PDFs under `raw/papers/`** (gitignored). If you are using Claudian inside Obsidian, nothing else to install. If you would rather use the Claude Code CLI against the vault directory, install [Claude Code](https://claude.com/claude-code) — the same twelve commands work there because they follow Claude Code's `.claude/commands/` format.
+4. **The twelve slash commands are already wired up** — just type `/read-paper` into Claudian's Obsidian chat (or into Claude Code, if you went the CLI route) while the vault is the working directory. `SKILL.md` is loaded as shared context automatically.
 5. **Edit `SKILL.md`** at `.claude/skills/SKILL.md`. The top section ("Researcher profile") has placeholders for your role, research domain, output language, and common obligations — fill them in so Claude tailors analysis and output accordingly. Everything below the horizontal rule is the universal workflow spec and should not need editing.
 
 ### Recommended customization points
@@ -205,7 +208,7 @@ Note on the spec-only commands:
 - Paper PDFs and extracted-text files (copyright)
 - Paper screenshots / pasted images (copyright)
 - The author's research notes, wiki sources, concept pages, synthesis pages, seminar reports, and PPT drafts — those live locally and are gitignored
-- Personal Claude Code session history (`.claude/sessions/`) and permission-allowlist (`.claude/settings.json` — full of personal file paths)
+- Personal Claudian and Claude Code state: session history (`.claude/sessions/`), permission-allowlist (`.claude/settings.json` — full of personal file paths), and Claudian's own config (`.claudian/`)
 - Obsidian workspace state and third-party plugin binaries (reinstalled from `community-plugins.json` on first launch)
 - Obsidian personal preferences: `.obsidian/appearance.json` (theme, font size, light/dark mode), `.obsidian/graph.json` (graph-view layout, colour grouping, zoom), and `.obsidian/core-plugins.json` (which Obsidian built-in plugins are enabled or disabled). These are personal taste, not workflow configuration — each user picks their own, and Obsidian regenerates sensible defaults on first launch.
 
@@ -214,7 +217,7 @@ Note on the spec-only commands:
 - **Zero-config paper summaries.** If you want to drop PDFs into a hopper and get auto-summaries, this is not it. The review gate exists because quality matters more than throughput for research work; expect to spend 10–30 minutes per paper on `/review-note`.
 - **A better Zotero.** No literature discovery, no citation export, no library sync. Pair with Zotero: Zotero for finding and filing papers, this repo for reading them deeply and synthesising across them.
 - **A generic Obsidian starter.** The schema is tuned to academic papers (source / concept / entity / synthesis pages, `review_status` frontmatter, cascade-caveat citations). Adapt it for non-paper knowledge if you want, but expect to rewrite several commands.
-- **Cloud backup or collaboration.** Everything is local files plus Claude Code. No hosted index, no user accounts, no multi-user sync. Pair with your own backup tool (OneDrive, Dropbox, git, etc.) — note that OneDrive and `.git/` do not play well together, so git separately from your vault sync path.
+- **Cloud backup or collaboration.** Everything is local files plus a Claude session (via Claudian or Claude Code). No hosted index, no user accounts, no multi-user sync. Pair with your own backup tool (OneDrive, Dropbox, git, etc.) — note that OneDrive and `.git/` do not play well together, so git separately from your vault sync path.
 
 ## Credit and license
 
