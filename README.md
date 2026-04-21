@@ -187,7 +187,13 @@ Red flags the reviewer actively hunts for (each has burned a real paper):
 
 ## What is and isn't in this repo
 
-**Included**: all twelve slash commands (the two newest — `/search-vault` and `/lint-related-work` — are shipped as spec-only markdown; their Python implementations are intentionally not bundled, see below), `SKILL.md`, the wiki schema (`index.md`, `dashboard.md`), Obsidian config (app settings, plugin list, graph settings), Obsidian note templates, and this README.
+**Included**: all twelve slash commands (the two newest — `/search-vault` and `/lint-related-work` — are shipped as spec-only markdown; their Python implementations are intentionally not bundled, see below), `SKILL.md`, the wiki schema (`index.md`, `dashboard.md`), Obsidian config (app settings and plugin list), Obsidian note templates, and this README.
+
+About `.obsidian/`: only the workflow-relevant config is tracked — `app.json` (contains the paste-image convention `attachmentFolderPath: "./${filename}"`) and `community-plugins.json` (tells Obsidian which plugins to prompt you to install — Dataview, Claudian, BRAT). Personal preferences (theme, graph view, built-in plugin toggles, workspace layout) are all gitignored so they do not overwrite your own settings when you clone this.
+
+About `wiki/dashboard.md` and `wiki/index.md`: both are pre-built Dataview templates. They will look empty when you first open the freshly-cloned vault, because the queries have no pages to aggregate yet. Once you start ingesting papers with `/ingest-to-wiki`, they populate automatically — there is no manual step to "activate" them.
+
+`note/Templates/` holds two Obsidian note templates (paper and seminar-report). They are starting points, not prescriptions: edit the frontmatter fields, section headings, and prompts to match your own reading style.
 
 Note on the spec-only commands:
 
@@ -201,7 +207,7 @@ Note on the spec-only commands:
 - The author's research notes, wiki sources, concept pages, synthesis pages, seminar reports, and PPT drafts — those live locally and are gitignored
 - Personal Claude Code session history (`.claude/sessions/`) and permission-allowlist (`.claude/settings.json` — full of personal file paths)
 - Obsidian workspace state and third-party plugin binaries (reinstalled from `community-plugins.json` on first launch)
-- Obsidian personal visual preferences: `.obsidian/appearance.json` (theme, font size, light/dark mode) and `.obsidian/graph.json` (graph-view layout, colour grouping, zoom). These are personal taste, not workflow configuration — each user picks their own, and Obsidian regenerates sensible defaults on first launch.
+- Obsidian personal preferences: `.obsidian/appearance.json` (theme, font size, light/dark mode), `.obsidian/graph.json` (graph-view layout, colour grouping, zoom), and `.obsidian/core-plugins.json` (which Obsidian built-in plugins are enabled or disabled). These are personal taste, not workflow configuration — each user picks their own, and Obsidian regenerates sensible defaults on first launch.
 
 ## Non-goals
 
