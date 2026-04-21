@@ -53,6 +53,12 @@ hake_reread.txt
 **/.obsidian/workspace.json.bak
 **/.obsidian/plugins/
 
+# ─── Obsidian personal visual preferences (theme, graph view) ────────
+# These are personal taste, not workflow config. Each user picks their own;
+# Obsidian regenerates sensible defaults on first launch.
+**/.obsidian/appearance.json
+**/.obsidian/graph.json
+
 # ─── OS / OneDrive artifacts ─────────────────────────────────────────
 Thumbs.db
 desktop.ini

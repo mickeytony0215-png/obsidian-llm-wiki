@@ -183,6 +183,7 @@ Red flags the reviewer actively hunts for (each has burned a real paper):
 - **`note/Templates/paper-template.md`** — the frontmatter schema for new paper notes.
 - **`wiki/index.md`** — Dataview queries. Edit if you rename or add wiki subfolders.
 - **Command files under `.claude/commands/`** — tweak trigger phrasing, output format, or review-gate strictness.
+- **Your Obsidian look and feel (personal taste, not shared)** — theme, font size, light/dark mode (`.obsidian/appearance.json`) and graph-view layout (`.obsidian/graph.json`) are not tracked in this repo. Set them however you like in `Settings → Appearance` and the graph view; they live only on your machine.
 
 ## What is and isn't in this repo
 
@@ -200,6 +201,7 @@ Note on the spec-only commands:
 - The author's research notes, wiki sources, concept pages, synthesis pages, seminar reports, and PPT drafts — those live locally and are gitignored
 - Personal Claude Code session history (`.claude/sessions/`) and permission-allowlist (`.claude/settings.json` — full of personal file paths)
 - Obsidian workspace state and third-party plugin binaries (reinstalled from `community-plugins.json` on first launch)
+- Obsidian personal visual preferences: `.obsidian/appearance.json` (theme, font size, light/dark mode) and `.obsidian/graph.json` (graph-view layout, colour grouping, zoom). These are personal taste, not workflow configuration — each user picks their own, and Obsidian regenerates sensible defaults on first launch.
 
 ## Non-goals
 
